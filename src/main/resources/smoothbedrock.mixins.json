@@ -1,0 +1,11 @@
+{
+  "required": true,
+  "package": "me.xa5.smoothbedrock.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [
+    "MixinFlatBedrock"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

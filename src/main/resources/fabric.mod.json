@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "id": "smoothbedrock",
+  "name": "Smooth Bedrock (Fabric)",
+  "description": "Smooth bedrock mod for fabric.",
+  "version": "${version}",
+  "environment": "*",
+  "authors": [
+    "Blayyke"
+  ],
+  "entrypoints": {
+    "main": [
+      "me.xa5.smoothbedrock.SmoothBedrock"
+    ]
+  },
+  "requires": {
+    "fabricloader": ">=0.4.0"
+  },
+  "mixins": [
+    "smoothbedrock.mixins.json"
+  ],
+  "contact": {
+    "sources": "https://github.com/Blayyke/SmoothBedrockFabric"
+  },
+  "license": "GPL-3.0",
+  "icon": "assets/smoothbedrock/icon.png"
+}

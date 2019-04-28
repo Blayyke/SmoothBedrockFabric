@@ -1,0 +1,81 @@
+plugins {
+    id 'fabric-loom' version '0.2.0-SNAPSHOT'
+    id "com.github.johnrengelman.shadow" version "4.0.4"
+}
+
+sourceCompatibility = targetCompatibility = JavaVersion.VERSION_1_8
+
+archivesBaseName = "smoothbedrock"
+version = "${mod_version}"
+
+processResources {
+    // this will ensure that this task is redone when there"s a change
+    inputs.property "version", project.version
+
+    // replace stuff in fabric.mod.json, nothing else
+    from(sourceSets.main.resources.srcDirs) {
+        include "fabric.mod.json"
+
+        // add mod metadata
+        expand "version": project.version
+    }
+
+    // copy everything else, that"s not the mcmod.info
+    from(sourceSets.main.resources.srcDirs) {
+        exclude "fabric.mod.json"
+    }
+}
+
+minecraft {
+}
+
+repositories {
+    maven {
+        name = 'sponge'
+        url = 'https://repo.spongepowered.org/maven'
+    }
+    maven {
+        name = 'tehnut.info'
+        url = 'http://tehnut.info/maven'
+    }
+}
+configurations {
+    embed {
+        transitive = false
+    }
+}
+dependencies {
+    implementation "org.spongepowered:configurate-hocon:${configurate_hocon_version}"
+    embed "org.spongepowered:configurate-hocon:${configurate_hocon_version}"
+
+    minecraft "com.mojang:minecraft:${minecraft_version}"
+    mappings "net.fabricmc:yarn:${yarn_mappings}"
+
+    modCompile "net.fabricmc:fabric-loader:${loader_version}"
+//    modCompile "net.fabricmc:fabric:${fabric_version}"
+
+    compileOnly group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.2'
+}
+
+compileJava {
+    options.encoding = "UTF-8"
+}
+
+shadowJar {
+    from "LICENSE.md"
+    classifier = null
+    configurations = [project.configurations.embed]
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    from sourceSets.main.allSource
+    classifier = "sources"
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    from javadoc.destinationDir
+    from "LICENSE.md"
+    classifier = "javadoc"
+}
+tasks.remapJar.dependsOn shadowJar
+//tasks.publish.dependsOn build

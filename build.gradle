@@ -1,6 +1,5 @@
 plugins {
-    id 'fabric-loom' version '0.2.0-SNAPSHOT'
-    id "com.github.johnrengelman.shadow" version "4.0.4"
+    id 'fabric-loom' version '0.2.1-SNAPSHOT'
 }
 
 sourceCompatibility = targetCompatibility = JavaVersion.VERSION_1_8
@@ -26,9 +25,6 @@ processResources {
     }
 }
 
-minecraft {
-}
-
 repositories {
     maven {
         name = 'sponge'
@@ -39,14 +35,10 @@ repositories {
         url = 'http://tehnut.info/maven'
     }
 }
-configurations {
-    embed {
-        transitive = false
-    }
-}
+
 dependencies {
-    implementation "org.spongepowered:configurate-hocon:${configurate_hocon_version}"
-    embed "org.spongepowered:configurate-hocon:${configurate_hocon_version}"
+    implementation 	"blue.endless:jankson:1.1.2"
+    include "blue.endless:jankson:1.1.2"
 
     minecraft "com.mojang:minecraft:${minecraft_version}"
     mappings "net.fabricmc:yarn:${yarn_mappings}"
@@ -61,12 +53,6 @@ compileJava {
     options.encoding = "UTF-8"
 }
 
-shadowJar {
-    from "LICENSE.md"
-    classifier = null
-    configurations = [project.configurations.embed]
-}
-
 task sourcesJar(type: Jar, dependsOn: classes) {
     from sourceSets.main.allSource
     classifier = "sources"
@@ -77,5 +63,4 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
     from "LICENSE.md"
     classifier = "javadoc"
 }
-tasks.remapJar.dependsOn shadowJar
-//tasks.publish.dependsOn build
+//tasks.remapJar.dependsOn shadowJar

@@ -2,9 +2,9 @@ package me.xa5.smoothbedrock;
 
 import me.xa5.modconfig.ModConfig;
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.loader.FabricLoader;
-import net.minecraft.world.IWorld;
-import net.minecraft.world.dimension.DimensionType;
+import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.util.Identifier;
+import org.apache.commons.lang3.ArrayUtils;
 
 import java.io.File;
 
@@ -19,7 +19,7 @@ public class SmoothBedrock implements ModInitializer {
         instance = this;
 
         ModConfig modConfig = new ModConfig();
-        modConfig.configFile = new File(FabricLoader.INSTANCE.getConfigDirectory(), MOD_ID + ".hjson");
+        modConfig.configFile = new File(FabricLoader.getInstance().getConfigDirectory(), MOD_ID + ".hjson");
         modConfig.saveDefaultConfig();
         this.config = modConfig.loadConfig();
     }
@@ -28,14 +28,14 @@ public class SmoothBedrock implements ModInitializer {
         return instance;
     }
 
-    public boolean shouldModifyBedrock(IWorld world) {
-        boolean isInList = config.dimensionFilter.contains(DimensionType.getId(world.getDimension().getType()).toString());
+    public boolean shouldModifyBedrock(Identifier dimType) {
+        boolean isInList = ArrayUtils.contains(config.dimensionFilter, dimType.toString());
 
         if (config.isWhitelist) {
-            // Is a whitelist; only return true if the dimension is inside the list
+//             Is a whitelist; only return true if the dimension is inside the list
             return isInList;
         } else {
-            // Return true if the dimension is not in the list, as it is a blacklist.
+//             Return true if the dimension is not in the list, as it is a blacklist.
             return !isInList;
         }
     }

@@ -38,7 +38,6 @@ public class ModConfig {
                 out.write(result.getBytes());
                 out.flush();
                 out.close();
-                SmoothBedrock.LOGGER.info("savced default!");
             }
         } catch (IOException e) {
             SmoothBedrock.LOGGER.warn("Failed to save default config: " + e.getMessage());

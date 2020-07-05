@@ -33,14 +33,13 @@ public class ModConfig {
                 .toJson(true, true, 0);     //The second turns the JsonObject into a String -
         //in this case, preserving comments and pretty-printing with newlines
         try {
-            if (!configFile.exists()) {
-                configFile.createNewFile();
+            if (configFile.createNewFile()) {
+                FileOutputStream out = new FileOutputStream(configFile, false);
+                out.write(result.getBytes());
+                out.flush();
+                out.close();
+                SmoothBedrock.LOGGER.info("savced default!");
             }
-            FileOutputStream out = new FileOutputStream(configFile, false);
-
-            out.write(result.getBytes());
-            out.flush();
-            out.close();
         } catch (IOException e) {
             SmoothBedrock.LOGGER.warn("Failed to save default config: " + e.getMessage());
             e.printStackTrace();

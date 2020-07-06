@@ -15,16 +15,16 @@ dependencies {
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
     mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
-    modApi ("io.github.cottonmc:Jankson:1.0.0+j1.1.2") { transitive = false }
-    include "io.github.cottonmc:Jankson:1.0.0+j1.1.2"
+    modApi("io.github.cottonmc:Jankson-Fabric:$project.jankson_version") { transitive = false }
+    include "io.github.cottonmc:Jankson-Fabric:$project.jankson_version"
 
     compileOnly group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.2'
 }
 
 repositories {
     maven {
+        url = "http://server.bbkr.space:8081/artifactory/libs-release"
         name = "Cotton"
-        url = "http://server.bbkr.space:8081/artifactory/libs-release/"
     }
 }
 

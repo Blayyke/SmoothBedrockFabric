@@ -2,7 +2,7 @@ package me.xa5.modconfig;
 
 import blue.endless.jankson.Jankson;
 import blue.endless.jankson.JsonObject;
-import blue.endless.jankson.impl.SyntaxError;
+import blue.endless.jankson.api.SyntaxError;
 import me.xa5.smoothbedrock.Config;
 import me.xa5.smoothbedrock.SmoothBedrock;
 

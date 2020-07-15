@@ -7,6 +7,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.ChunkRegion;
 import net.minecraft.world.biome.source.BiomeSource;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.gen.ChunkRandom;
 import net.minecraft.world.gen.chunk.ChunkGenerator;
 import net.minecraft.world.gen.chunk.ChunkGeneratorType;
 import net.minecraft.world.gen.chunk.StructuresConfig;
@@ -23,15 +24,23 @@ import java.util.Random;
 
 @Mixin(SurfaceChunkGenerator.class)
 public abstract class MixinFlatBedrock extends ChunkGenerator {
-    @Shadow @Final protected ChunkGeneratorType field_24774;
+    @Shadow
+    @Final
+    protected ChunkGeneratorType field_24774;
+    @Shadow
+    @Final
+    private int field_24779; // worldHeight
+    @Shadow
+    @Final
+    protected ChunkRandom random;
     ThreadLocal<Identifier> dimId = new ThreadLocal<>();
 
     public MixinFlatBedrock(BiomeSource biomeSource_1, StructuresConfig chunkGeneratorConfig_1) {
         super(biomeSource_1, chunkGeneratorConfig_1);
     }
 
-    @Inject(method = "buildSurface", at=@At("HEAD"), cancellable = true)
-    public void test(ChunkRegion region, Chunk chunk, CallbackInfo info){
+    @Inject(method = "buildSurface", at = @At("HEAD"), cancellable = true)
+    public void test(ChunkRegion region, Chunk chunk, CallbackInfo info) {
         // TODO why is this deprecated? Maybe there's a better way to get the ID.
         dimId.set(region.getWorld().getDimensionRegistryKey().getValue());
     }
@@ -39,35 +48,33 @@ public abstract class MixinFlatBedrock extends ChunkGenerator {
     @Inject(method = "buildBedrock", at = @At("HEAD"), cancellable = true)
     private void buildBedrock(Chunk chunk, Random rand, CallbackInfo info) {
         if (SmoothBedrock.getInstance().shouldModifyBedrock(dimId.get())) {
+            info.cancel();
 
+            BlockPos.Mutable mutable = new BlockPos.Mutable();
+            int chunkStartX = chunk.getPos().getStartX();
+            int chunkStartZ = chunk.getPos().getStartZ();
+            int bedrockFloor = this.field_24774.getBedrockFloorY();
+            int bedrockRoof = field_24779 - 1 - this.field_24774.getBedrockCeilingY();
+            boolean generateRoof = bedrockRoof + 4 >= 0 && bedrockRoof < this.field_24779;
+            boolean generateFloor = bedrockFloor + 4 >= 0 && bedrockFloor < this.field_24779;
 
-            BlockPos.Mutable mutableBlockPos = new BlockPos.Mutable();
-            int chunkXStart = chunk.getPos().getStartX();
-            int chunkZStart = chunk.getPos().getStartZ();
-            int minY = field_24774.getBedrockFloorY(); // Overworld: 0. Nether: 0
-            int maxY = field_24774.getBedrockCeilingY(); // Overworld: 0. Nether: 127
-            Iterator<BlockPos> var9 = BlockPos.iterate(chunkXStart, 0, chunkZStart, chunkXStart + 16, 0, chunkZStart + 16).iterator();
-            while (true) {
-                BlockPos blockPos_1;
-                do {
-                    if (!var9.hasNext()) {
-                        info.cancel(); // Prevent vanilla code from running.
-                        return;
-                    }
+            if (generateFloor || generateRoof) {
+                Iterator<BlockPos> chunkBlocks = BlockPos.iterate(chunkStartX, 0, chunkStartZ, chunkStartX + 15, 0, chunkStartZ + 15).iterator();
+                while (true) {
+                    BlockPos blockPos;
+                    do {
+                        if (!chunkBlocks.hasNext()) {
+                            return;
+                        }
 
-                    blockPos_1 = (BlockPos) var9.next();
-                    if (maxY > 0) {
-                        // CavesChunkGeneratorSettings overrides maxY to provide a bedrock roof.
-                        // This code will only be run by worlds with a custom maxY.
+                        blockPos = chunkBlocks.next();
+                        if (generateRoof) {
+                            chunk.setBlockState(mutable.set(blockPos.getX(), bedrockRoof, blockPos.getZ()), Blocks.BEDROCK.getDefaultState(), false);
+                        }
+                    } while (!generateFloor);
 
-                        mutableBlockPos.set(blockPos_1.getX(), maxY, blockPos_1.getZ());
-                        chunk.setBlockState(mutableBlockPos, Blocks.BEDROCK.getDefaultState(), false);
-                    }
-                } while (minY >= 256);
-
-                // Generate world floor.
-                mutableBlockPos.set(blockPos_1.getX(), minY, blockPos_1.getZ());
-                chunk.setBlockState(mutableBlockPos, Blocks.BEDROCK.getDefaultState(), false);
+                    chunk.setBlockState(mutable.set(blockPos.getX(), bedrockFloor, blockPos.getZ()), Blocks.BEDROCK.getDefaultState(), false);
+                }
             }
         }
     }

@@ -4,14 +4,15 @@ import me.xa5.smoothbedrock.SmoothBedrock;
 import net.minecraft.block.Blocks;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.world.ChunkRegion;
 import net.minecraft.world.biome.source.BiomeSource;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.gen.ChunkRandom;
 import net.minecraft.world.gen.chunk.ChunkGenerator;
-import net.minecraft.world.gen.chunk.ChunkGeneratorType;
+import net.minecraft.world.gen.chunk.ChunkGeneratorSettings;
 import net.minecraft.world.gen.chunk.StructuresConfig;
-import net.minecraft.world.gen.chunk.SurfaceChunkGenerator;
+import net.minecraft.world.gen.chunk.NoiseChunkGenerator;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -21,15 +22,16 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.Iterator;
 import java.util.Random;
+import java.util.function.Supplier;
 
-@Mixin(SurfaceChunkGenerator.class)
+@Mixin(NoiseChunkGenerator.class)
 public abstract class MixinFlatBedrock extends ChunkGenerator {
     @Shadow
     @Final
-    protected ChunkGeneratorType field_24774;
+    protected Supplier<ChunkGeneratorSettings> settings;
     @Shadow
     @Final
-    private int field_24779; // worldHeight
+    private int worldHeight; // worldHeight
     @Shadow
     @Final
     protected ChunkRandom random;
@@ -42,7 +44,7 @@ public abstract class MixinFlatBedrock extends ChunkGenerator {
     @Inject(method = "buildSurface", at = @At("HEAD"), cancellable = true)
     public void test(ChunkRegion region, Chunk chunk, CallbackInfo info) {
         // TODO why is this deprecated? Maybe there's a better way to get the ID.
-        dimId.set(region.getWorld().getDimensionRegistryKey().getValue());
+        dimId.set(region.getRegistryManager().get(Registry.DIMENSION_TYPE_KEY).getId(region.getDimension()));
     }
 
     @Inject(method = "buildBedrock", at = @At("HEAD"), cancellable = true)
@@ -53,10 +55,10 @@ public abstract class MixinFlatBedrock extends ChunkGenerator {
             BlockPos.Mutable mutable = new BlockPos.Mutable();
             int chunkStartX = chunk.getPos().getStartX();
             int chunkStartZ = chunk.getPos().getStartZ();
-            int bedrockFloor = this.field_24774.getBedrockFloorY();
-            int bedrockRoof = field_24779 - 1 - this.field_24774.getBedrockCeilingY();
-            boolean generateRoof = bedrockRoof + 4 >= 0 && bedrockRoof < this.field_24779;
-            boolean generateFloor = bedrockFloor + 4 >= 0 && bedrockFloor < this.field_24779;
+            int bedrockFloor = this.settings.get().getBedrockFloorY();
+            int bedrockRoof = worldHeight - 1 - this.settings.get().getBedrockCeilingY();
+            boolean generateRoof = bedrockRoof + 4 >= 0 && bedrockRoof < this.worldHeight;
+            boolean generateFloor = bedrockFloor + 4 >= 0 && bedrockFloor < this.worldHeight;
 
             if (generateFloor || generateRoof) {
                 Iterator<BlockPos> chunkBlocks = BlockPos.iterate(chunkStartX, 0, chunkStartZ, chunkStartX + 15, 0, chunkStartZ + 15).iterator();

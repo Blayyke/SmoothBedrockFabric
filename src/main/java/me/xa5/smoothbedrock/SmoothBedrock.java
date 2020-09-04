@@ -19,7 +19,7 @@ public class SmoothBedrock implements ModInitializer {
         instance = this;
 
         ModConfig modConfig = new ModConfig();
-        modConfig.configFile = new File(FabricLoader.getInstance().getConfigDirectory(), MOD_ID + ".hjson");
+        modConfig.configFile = new File(FabricLoader.getInstance().getConfigDir().toString(), MOD_ID + ".json5");
         modConfig.saveDefaultConfig();
         this.config = modConfig.loadConfig();
     }
